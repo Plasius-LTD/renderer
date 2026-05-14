@@ -1,2 +1,53 @@
-# renderer
+# @plasius/renderer
+
+[![npm version](https://img.shields.io/npm/v/@plasius/renderer.svg)](https://www.npmjs.com/package/@plasius/renderer)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/Plasius-LTD/renderer/ci.yml?branch=main&label=build&style=flat)](https://github.com/Plasius-LTD/renderer/actions/workflows/ci.yml)
+[![coverage](https://img.shields.io/codecov/c/github/Plasius-LTD/renderer)](https://codecov.io/gh/Plasius-LTD/renderer)
+[![License](https://img.shields.io/github/license/Plasius-LTD/renderer)](./LICENSE)
+[![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-yes-blue.svg)](./CODE_OF_CONDUCT.md)
+[![Security Policy](https://img.shields.io/badge/security%20policy-yes-orange.svg)](./SECURITY.md)
+[![Changelog](https://img.shields.io/badge/changelog-md-blue.svg)](./CHANGELOG.md)
+
 3D renderer components for Plasius projects with XR session integration hooks.
+Camera controls are implemented through `@plasius/gpu-camera` (no
+`camera-controls` dependency).
+
+Apache-2.0. ESM build output. TypeScript types included.
+
+## Installation
+
+```bash
+npm install @plasius/renderer
+```
+
+## Usage
+
+```ts
+import { Renderer } from "@plasius/renderer";
+```
+
+## Development
+
+```bash
+npm ci
+npm run lint
+npm run typecheck
+npm run build
+npm test
+```
+
+## Governance
+
+- ADRs: [docs/adrs](./docs/adrs)
+- TDRs: [docs/tdrs](./docs/tdrs)
+- Design notes: [docs/design](./docs/design)
+- Contributing: [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+## Build outputs
+
+- ESM: `dist/`
+- Types: `dist/*.d.ts`
+
+## License
+
+Apache-2.0
