@@ -77,6 +77,22 @@ describe("world-space compositor", () => {
     expect(alertOrder).toBe(2320);
   });
 
+  it("derives slot order for direct render-order callers", () => {
+    const slotOrder = ["reticle", "target"];
+    const targetOrder = resolveWorldSpaceRenderOrder(
+      {
+        id: "target-overlay",
+        slot: "target",
+        layer: "overlay",
+      },
+      {
+        slotOrder,
+      }
+    );
+
+    expect(targetOrder).toBe(2210);
+  });
+
   it("sorts surfaces and reports exclusive screen-slot collisions", () => {
     const { surfaces, collisions } = composeWorldSpaceSurfaces(
       [

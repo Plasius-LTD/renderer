@@ -131,6 +131,24 @@ function normalizePriority(value?: number): number {
   return Math.trunc(value as number);
 }
 
+function resolveSlotIndex(
+  slot: string,
+  options: WorldSpaceCompositionOptions & { slotIndex?: number }
+): number {
+  if (typeof options.slotIndex === "number") {
+    return options.slotIndex;
+  }
+
+  const preferredSlotOrder = options.slotOrder ?? [];
+  const preferredIndex = preferredSlotOrder.indexOf(slot);
+
+  if (preferredIndex >= 0) {
+    return preferredIndex;
+  }
+
+  return 0;
+}
+
 function buildSlotIndexMap(
   surfaces: readonly WorldSpaceSurfaceInput[],
   preferredSlotOrder: readonly string[]
@@ -169,7 +187,7 @@ export function resolveWorldSpaceRenderOrder(
   const occlusionMode =
     surface.occlusionMode ?? layerConfig.defaultOcclusionMode;
   const policy = OCCLUSION_POLICIES[occlusionMode];
-  const slotIndex = options.slotIndex ?? 0;
+  const slotIndex = resolveSlotIndex(surface.slot, options);
   const startingRenderOrder = options.startingRenderOrder ?? 1000;
   const slotStep = options.slotStep ?? 1000;
   const priorityStep = options.priorityStep ?? 10;
