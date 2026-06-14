@@ -124,6 +124,7 @@ jobs:
 
       - name: Update CHANGELOG.md (move Unreleased to new version)
         env:
+          BUMP_MODE: ${{ inputs.bump }}
           VERSION: ${{ steps.pkg.outputs.version }}
           TAG: ${{ steps.pkg.outputs.tag }}
           GITHUB_REPOSITORY: ${{ github.repository }}
@@ -141,6 +142,16 @@ jobs:
 
           DATE=$(date -u +%Y-%m-%d)
           VERSION_LINE="## [${VERSION}] - ${DATE}"
+
+          if [ "${BUMP_MODE}" = "none" ]; then
+            if grep -Eq "^## \\[${VERSION}\\] - " "$FILE"; then
+              echo "Publish-only mode: CHANGELOG.md already contains ${VERSION}; skipping write-back."
+              exit 0
+            fi
+
+            echo "Publish-only mode requires CHANGELOG.md to already contain ${VERSION} before dispatch." >&2
+            exit 1
+          fi
 
           # Identify Unreleased block boundaries
           UNREL_START=$(grep -n '^## \[Unreleased\]' "$FILE" | cut -d: -f1 || true)
