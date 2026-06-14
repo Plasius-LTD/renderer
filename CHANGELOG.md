@@ -23,6 +23,7 @@ The format is based on **[Keep a Changelog](https://keepachangelog.com/en/1.1.0/
 - **Fixed**
   - Removed monorepo-relative TypeScript configuration coupling for standalone builds.
   - Removed legacy `camera-controls` build artifacts from published output.
+  - Removed the unused unpublished `@plasius/shadow` dependency so clean standalone installs no longer rely on a missing registry package or local-link lockfile entries.
 
 - **Security**
   - Added baseline public package governance and CLA documentation.
