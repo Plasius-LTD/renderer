@@ -226,18 +226,19 @@ jobs:
           set -euo pipefail
           TAG="${{ steps.pkg.outputs.tag }}"
           if gh release view "$TAG" >/dev/null 2>&1; then
-            echo "Release $TAG already exists; uploading SBOM asset."
+            echo "Release $TAG already exists; skipping immutable-release asset upload."
           else
-            gh release create "$TAG" \
-              --title "Release $TAG" \
-              --generate-notes \
-              --latest
-          fi
-          # Upload/overwrite the SBOM asset on the release
-          if [ -f sbom.cdx.json ]; then
-            gh release upload "$TAG" sbom.cdx.json --clobber
-          else
-            echo "No SBOM generated; skipping upload."
+            if [ -f sbom.cdx.json ]; then
+              gh release create "$TAG" sbom.cdx.json \
+                --title "Release $TAG" \
+                --generate-notes \
+                --latest
+            else
+              gh release create "$TAG" \
+                --title "Release $TAG" \
+                --generate-notes \
+                --latest
+            fi
           fi
 
       - name: Publish
