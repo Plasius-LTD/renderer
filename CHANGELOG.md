@@ -12,11 +12,13 @@ The format is based on **[Keep a Changelog](https://keepachangelog.com/en/1.1.0/
   - Standalone public package scaffold at repository root with independent CI/CD, ADRs, and legal governance assets.
   - Framework-agnostic camera runtime integration using `@plasius/gpu-camera`.
   - CONTRIBUTING guidance plus TDR and design scaffolding to match the schema-derived package baseline.
+  - World-space compositor helpers for ordering focused screens, overlays, and localized alerts with reusable occlusion policy presets.
 
 - **Changed**
   - Add standalone ESM build outputs with `exports` entries for public npm distribution.
   - Replaced `camera-controls` usage with managed orbit/pan/dolly controls driven by `@plasius/gpu-camera`.
   - Aligned repository governance, lint configuration, and package licensing with the public package baseline used across new Plasius package repositories.
+  - Documented the contract-first renderer API for future Player/Party System composition work.
 
 - **Fixed**
   - Removed monorepo-relative TypeScript configuration coupling for standalone builds.

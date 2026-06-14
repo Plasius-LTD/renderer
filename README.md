@@ -23,7 +23,15 @@ npm install @plasius/renderer
 ## Usage
 
 ```ts
-import { Renderer } from "@plasius/renderer";
+import {
+  Renderer,
+  composeWorldSpaceSurfaces,
+} from "@plasius/renderer";
+
+const { surfaces, collisions } = composeWorldSpaceSurfaces([
+  { id: "focus-pane", slot: "reticle", layer: "screen" },
+  { id: "mission-alert", slot: "reticle", layer: "alert" },
+]);
 ```
 
 ## Development
@@ -42,6 +50,15 @@ npm test
 - TDRs: [docs/tdrs](./docs/tdrs)
 - Design notes: [docs/design](./docs/design)
 - Contributing: [CONTRIBUTING.md](./CONTRIBUTING.md)
+
+## World-Space UI Helpers
+
+- `composeWorldSpaceSurfaces(...)` resolves deterministic render ordering for
+  world-space `screen`, `overlay`, and `alert` surfaces.
+- `resolveWorldSpaceOcclusionPolicy(...)` provides material-safe defaults for
+  depth-aware panels, overlay-biased prompts, and always-visible alerts.
+- Collision reporting flags slots that should only host one focused screen at a
+  time so host runtimes can arbitrate before rendering.
 
 ## Build outputs
 
