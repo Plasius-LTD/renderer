@@ -40,7 +40,7 @@ export function AdaptiveDPR() {
           currentPerf = Perf.Low;
           dispatch({ type: "set_performance_tier", payload: "low" });
           gl.setPixelRatio(1);
-        } else if (avgFPS >= 40 && avgFPS < 80 && currentPerf !== Perf.Medium) {
+        } else if (avgFPS >= 40 && avgFPS < 70 && currentPerf !== Perf.Medium) {
           currentPerf = Perf.Medium;
           dispatch({ type: "set_performance_tier", payload: "medium" });
 

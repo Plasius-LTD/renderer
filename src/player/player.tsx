@@ -30,7 +30,7 @@ function cross3(a: Vec3, b: Vec3): Vec3 {
   ];
 }
 
-function Player({
+export function PlayerContent({
   cameraManager,
   cameraId,
   children,
@@ -247,9 +247,9 @@ function WrappedPlayer({
 }: PropsWithChildren<{ cameraManager: CameraManager; cameraId: string }>) {
   return (
     <PlayerStore.Provider>
-      <Player cameraManager={cameraManager} cameraId={cameraId}>
+      <PlayerContent cameraManager={cameraManager} cameraId={cameraId}>
         {children}
-      </Player>
+      </PlayerContent>
     </PlayerStore.Provider>
   );
 }

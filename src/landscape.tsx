@@ -9,7 +9,7 @@ const AREA_WIDTH = 2000;
 const AREA_HEIGHT = 2000;
 
 // Generate a single high-resolution hexagon as BufferGeometry
-function generateHexTile(radius: number): THREE.BufferGeometry {
+export function generateHexTile(radius: number): THREE.BufferGeometry {
   const geom = new THREE.BufferGeometry();
   const vertices: number[] = [];
   const indices: number[] = [];
@@ -40,20 +40,24 @@ function generateHexTile(radius: number): THREE.BufferGeometry {
 }
 
 // Axial to world coordinates (pointy-topped hex)
-function axialToWorld(q: number, r: number, radius: number): [number, number] {
+export function axialToWorld(
+  q: number,
+  r: number,
+  radius: number
+): [number, number] {
   const x = ((radius * 3) / 2) * q;
   const z = radius * Math.sqrt(3) * (r + q / 2);
   return [x, z];
 }
 
 // Simple seeded noise for per-tile deformation
-function seededNoise(x: number, z: number, seed = 42): number {
+export function seededNoise(x: number, z: number, seed = 42): number {
   const s = Math.sin(x * 12.9898 + z * 78.233 + seed) * 43758.5453;
   return (s - Math.floor(s)) * 2 - 1;
 }
 
 // Deform only the interior (non-edge) vertices of a hex tile
-function deformHexInterior(
+export function deformHexInterior(
   geom: THREE.BufferGeometry,
   radius: number,
   seed = 42
@@ -89,7 +93,7 @@ function deformHexInterior(
   geom.computeVertexNormals();
 }
 
-function generateHexDepthMap(
+export function generateHexDepthMap(
   cols: number,
   rows: number,
   seed = 42
@@ -106,52 +110,54 @@ function generateHexDepthMap(
   return map;
 }
 
+export function buildLandscapeGeometry(): THREE.BufferGeometry {
+  const radius = HEX_RADIUS;
+  const tiles: THREE.BufferGeometry[] = [];
+
+  const spacingX = (3 / 2) * radius;
+  const spacingZ = Math.sqrt(3) * radius;
+  const cols = Math.ceil(AREA_WIDTH / spacingX);
+  const rows = Math.ceil(AREA_HEIGHT / spacingZ);
+
+  const offset = Math.floor(cols / 2);
+  const depthMap = generateHexDepthMap(cols, rows);
+  const elevationScale = 20;
+
+  const baseHex = generateHexTile(radius);
+
+  for (let q = -Math.floor(cols / 2); q < Math.ceil(cols / 2); q++) {
+    for (let r = -Math.floor(rows / 2); r < Math.ceil(rows / 2); r++) {
+      const hex = baseHex.clone();
+
+      const dq = q + offset;
+      const dr = r + offset;
+      const elevation = depthMap?.[dq]?.[dr] ?? 0;
+
+      deformHexInterior(
+        hex,
+        radius,
+        42 + q * 1000 + r + Math.floor(elevation * 100)
+      );
+
+      const [x, z] = axialToWorld(q, r, radius);
+      hex.translate(x, elevation * elevationScale, z);
+
+      tiles.push(hex);
+    }
+  }
+
+  const merged = BufferGeometryUtils.mergeGeometries(tiles, false);
+  // Remove normals before merging vertices to ensure proper welding
+  if (merged.attributes.normal) {
+    merged.deleteAttribute("normal");
+  }
+  const stitched = BufferGeometryUtils.mergeVertices(merged, 1e-2);
+  stitched.computeVertexNormals();
+  return stitched;
+}
+
 export function Landscape() {
-  const geometry = useMemo(() => {
-    const radius = HEX_RADIUS;
-    const tiles: THREE.BufferGeometry[] = [];
-
-    const spacingX = (3 / 2) * radius;
-    const spacingZ = Math.sqrt(3) * radius;
-    const cols = Math.ceil(AREA_WIDTH / spacingX);
-    const rows = Math.ceil(AREA_HEIGHT / spacingZ);
-
-    const offset = Math.floor(cols / 2);
-    const depthMap = generateHexDepthMap(cols, rows);
-    const elevationScale = 20;
-
-    const baseHex = generateHexTile(radius);
-
-    for (let q = -Math.floor(cols / 2); q < Math.ceil(cols / 2); q++) {
-      for (let r = -Math.floor(rows / 2); r < Math.ceil(rows / 2); r++) {
-        const hex = baseHex.clone();
-
-        const dq = q + offset;
-        const dr = r + offset;
-        const elevation = depthMap?.[dq]?.[dr] ?? 0;
-
-        deformHexInterior(
-          hex,
-          radius,
-          42 + q * 1000 + r + Math.floor(elevation * 100)
-        );
-
-        const [x, z] = axialToWorld(q, r, radius);
-        hex.translate(x, elevation * elevationScale, z);
-
-        tiles.push(hex);
-      }
-    }
-
-    const merged = BufferGeometryUtils.mergeGeometries(tiles, false);
-    // Remove normals before merging vertices to ensure proper welding
-    if (merged.attributes.normal) {
-      merged.deleteAttribute("normal");
-    }
-    const stitched = BufferGeometryUtils.mergeVertices(merged, 1e-2);
-    stitched.computeVertexNormals();
-    return stitched;
-  }, []);
+  const geometry = useMemo(buildLandscapeGeometry, []);
 
   return (
     <RigidBody type="fixed" colliders="trimesh">

@@ -12,8 +12,27 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: "24"
+          node-version-file: ".nvmrc"
           cache: "npm"
-      - run: npm install --no-fund --no-audit
+      - run: npm ci --no-fund --no-audit
       - run: npm run build
-      - run: npm test
+      - run: npm run test:coverage
+
+  # BEGIN PLASIUS PUBLIC ARTIFACT INTEGRITY JOB
+  public_artifact_integrity:
+    name: Public artifact integrity
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: [self-hosted, Linux, X64]
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+      - name: Verify public artifact integrity
+        run: node ./scripts/verify-public-artifacts.cjs '--package-dir' '.'
+  # END PLASIUS PUBLIC ARTIFACT INTEGRITY JOB
