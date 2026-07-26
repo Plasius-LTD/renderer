@@ -12,12 +12,15 @@ The format is based on **[Keep a Changelog](https://keepachangelog.com/en/1.1.0/
   - (placeholder)
 
 - **Changed**
+  - CI now runs the complete TypeScript and TSX test inventory with enforced 80% statement, branch, function, and line coverage thresholds.
   - (placeholder)
 
 - **Fixed**
+  - Prevented player base-attribute updates from mutating previous state, stabilised adaptive DPR selection at 70–79 FPS, and tightened public-package admission against symlink escapes and opaque spawn failures.
   - (placeholder)
 
 - **Security**
+  - Added fail-closed source and npm-package admission for the administrative contributor registry and pinned the CI/CD runtime to Node.js 24.18.0 LTS.
   - (placeholder)
 
 ## [1.0.2] - 2026-06-22

@@ -59,7 +59,7 @@ export interface RendererProps {
   multiview: boolean;
 }
 
-function Loader() {
+export function Loader() {
   const { progress } = useProgress();
   return <Html center>{progress} % loaded</Html>;
 }
@@ -71,7 +71,7 @@ enum Perf {
   Ultra,
 }
 
-function Renderer({
+export function RendererContent({
   cameraPosition,
   cameraRotation,
   multiview = true,
@@ -286,7 +286,7 @@ function Renderer({
 function WrappedRenderer(props: React.PropsWithChildren<RendererProps>) {
   return (
     <RenderStore.Provider>
-      <Renderer {...props} />
+      <RendererContent {...props} />
     </RenderStore.Provider>
   );
 }

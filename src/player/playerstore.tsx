@@ -453,7 +453,9 @@ function skillAttributeModifiers(state: PlayerState): AttributesFlat {
   return out;
 }
 
-function effectiveAttributes(state: PlayerState): AttributesFlat {
+export function selectEffectiveAttributes(
+  state: PlayerState
+): AttributesFlat {
   // Start with normalized base
   const base = flattenBase(state.attributesBase);
   // Add gear/effects layers
@@ -502,7 +504,10 @@ function effectiveAttributes(state: PlayerState): AttributesFlat {
 }
 
 // ====== Reducer ======
-function reducer(state: PlayerState, action: PlayerAction): PlayerState {
+export function reducePlayerState(
+  state: PlayerState,
+  action: PlayerAction
+): PlayerState {
   switch (action.type) {
     case "set_position":
       return { ...state, position: { ...action.payload } };
@@ -518,7 +523,11 @@ function reducer(state: PlayerState, action: PlayerAction): PlayerState {
       return { ...state, resources: next };
     }
     case "set_attributes_base": {
-      const next = { ...state.attributesBase };
+      const next: AttributesBase = {
+        physical: { ...state.attributesBase.physical },
+        mental: { ...state.attributesBase.mental },
+        spiritual: { ...state.attributesBase.spiritual },
+      };
       const apply = (k: AttributeKey, v: number) => {
         switch (k) {
           case "strength":
@@ -657,7 +666,10 @@ export type PlayerStoreContext = ReturnType<
 >;
 
 export const PlayerStore: PlayerStoreContext =
-  createScopedStoreContext<PlayerState, PlayerAction>(reducer, defaultState);
+  createScopedStoreContext<PlayerState, PlayerAction>(
+    reducePlayerState,
+    defaultState
+  );
 
 // Convenience re-exports for common actions (keeps call sites tidy)
 export const PlayerActions = {

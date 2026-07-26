@@ -50,7 +50,7 @@ type RenderAction =
       payload: boolean;
     };
 
-interface RenderState extends IState {
+export interface RenderState extends IState {
   frame: number;
   lastRenderTime: number;
   debugEnabled: boolean;
@@ -64,7 +64,7 @@ interface RenderState extends IState {
   useVR: boolean;
 }
 
-const initialState: RenderState = {
+export const initialRenderState: RenderState = {
   frame: 0,
   lastRenderTime: 0,
   debugEnabled: false,
@@ -78,12 +78,15 @@ const initialState: RenderState = {
   useVR: false,
 };
 
-const reducer = (state: RenderState, action: RenderAction): RenderState => {
+export const reduceRenderState = (
+  state: RenderState,
+  action: RenderAction
+): RenderState => {
   switch (action.type) {
     case "update":
       return { ...state };
     case "reset":
-      return initialState;
+      return initialRenderState;
     case "set_frame_rate":
       return { ...state, frameRate: action.payload };
     case "increment_accumulated_frames":
@@ -114,7 +117,10 @@ export type RenderStoreContext = ReturnType<
 >;
 
 export const RenderStore: RenderStoreContext =
-  createScopedStoreContext<RenderState, RenderAction>(reducer, initialState);
+  createScopedStoreContext<RenderState, RenderAction>(
+    reduceRenderState,
+    initialRenderState
+  );
 
 export const RenderProvider = ({ children }: { children: React.ReactNode }) => {
   return <RenderStore.Provider>{children}</RenderStore.Provider>;
