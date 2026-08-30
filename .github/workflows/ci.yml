@@ -1,4 +1,4 @@
-name: Retirement CI
+name: Retirement integrity
 
 on:
   push:
@@ -10,47 +10,36 @@ permissions:
   contents: read
 
 jobs:
-  trusted_head:
-    name: Trusted head admission
-    runs-on: ubuntu-latest
-    timeout-minutes: 2
-    permissions: {}
-    steps:
-      - name: Reject external fork execution
-        env:
-          EVENT_NAME: ${{ github.event_name }}
-          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
-          BASE_REPOSITORY: ${{ github.repository }}
-        run: |
-          set -euo pipefail
-          if [ "${EVENT_NAME}" = "pull_request" ] && [ "${HEAD_REPOSITORY}" != "${BASE_REPOSITORY}" ]; then
-            echo "External fork pull requests cannot execute repository retirement administration." >&2
-            exit 1
-          fi
-
-  validate_retirement:
-    name: Validate retirement administration
-    needs: trusted_head
-    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
+  validate_retired_tree:
+    name: Validate documentation-only retirement
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - name: Verify the one-purpose production workflow
+      - name: Reject executable package material and active guidance
         run: |
           set -euo pipefail
-          FILE=.github/workflows/cd.yml
-          grep -Fq 'environment: production' "${FILE}"
-          grep -Fq 'npm deprecate' "${FILE}"
-          grep -Fq 'secrets.NPM_TOKEN' "${FILE}"
-          grep -Fq 'RETIRE @plasius/renderer' "${FILE}"
-          if grep -Fq 'npm publish' "${FILE}"; then
-            echo "The retirement workflow must not contain a package publish path." >&2
+
+          ALLOWED='^(\.github/workflows/ci\.yml|README\.md|CHANGELOG\.md|docs/RETIREMENT\.md|CODE_OF_CONDUCT\.md|CONTRIBUTORS\.md|LICENSE|SECURITY\.md|legal/(CLA|CORPORATE_CLA|INDIVIDUAL_CLA)\.md)$'
+          UNEXPECTED="$(git ls-files | grep -Ev "${ALLOWED}" || true)"
+          if [ -n "${UNEXPECTED}" ]; then
+            echo "The retired repository contains files outside the documentation/legal inventory:" >&2
+            printf '%s\n' "${UNEXPECTED}" >&2
             exit 1
           fi
-          if grep -REq '^[[:space:]]*pull_request_target:' .github/workflows; then
-            echo "Retirement workflows must not use pull_request_target." >&2
-            exit 1
-          fi
+
+          for FORBIDDEN in package.json package-lock.json src tests demo scripts dist node_modules .npmrc .npmignore; do
+            if git ls-files "${FORBIDDEN}" "${FORBIDDEN}/**" | grep -q .; then
+              echo "Retired package material remains: ${FORBIDDEN}" >&2
+              exit 1
+            fi
+          done
+
+          grep -Fq '# `@plasius/renderer` — permanently retired' README.md
+          grep -Fq '@plasius/gpu-renderer' README.md
+          grep -Fq '@plasius/gpu-lighting' README.md
+          grep -Fq '@plasius/gpu-performance' README.md
+          grep -Fq 'No runtime tombstone or compatibility shim will be released.' docs/RETIREMENT.md
+          grep -Fq 'Three.js is prohibited and is not a fallback.' docs/RETIREMENT.md

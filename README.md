@@ -1,82 +1,34 @@
-# @plasius/renderer
+# `@plasius/renderer` — permanently retired
 
-[![npm version](https://img.shields.io/npm/v/@plasius/renderer.svg)](https://www.npmjs.com/package/@plasius/renderer)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/Plasius-LTD/renderer/ci.yml?branch=main&label=build&style=flat)](https://github.com/Plasius-LTD/renderer/actions/workflows/ci.yml)
-[![coverage](https://img.shields.io/codecov/c/github/Plasius-LTD/renderer)](https://codecov.io/gh/Plasius-LTD/renderer)
-[![License](https://img.shields.io/github/license/Plasius-LTD/renderer)](./LICENSE)
-[![Code of Conduct](https://img.shields.io/badge/code%20of%20conduct-yes-blue.svg)](./CODE_OF_CONDUCT.md)
-[![Security Policy](https://img.shields.io/badge/security%20policy-yes-orange.svg)](./SECURITY.md)
-[![Changelog](https://img.shields.io/badge/changelog-md-blue.svg)](./CHANGELOG.md)
+This repository and npm package were retired on 30 August 2026. Do not install,
+depend on, copy, or revive this package. No compatibility shim or tombstone
+runtime package will be published.
 
-3D renderer components for Plasius projects with XR session integration hooks.
-Camera controls are implemented through `@plasius/gpu-camera` (no
-`camera-controls` dependency).
+Every immutable npm version is retained only as registry history and is marked
+deprecated. Historical source remains available through Git history for audit;
+it is not active implementation guidance.
 
-Apache-2.0. ESM build output. TypeScript types included.
+## Permanent architecture invariant
 
-## Installation
+Three.js, its subpaths, TSL, React Three Fiber, related helpers, and any package
+whose dependency graph reaches Three.js are prohibited throughout the Plasius
+GPU-native renderer architecture. There is no fallback, compatibility mode,
+waiver, feature flag, rollback, or migration path that permits them.
 
-```bash
-npm install @plasius/renderer
-```
+The canonical decision is
+[ADR 0168](https://github.com/Plasius-LTD/plasius-ltd-site/blob/main/docs/adrs/adr-0168-three-js-is-prohibited-from-gpu-native-rendering.md).
 
-## Usage
+## GPU-native migration map
 
-```ts
-import {
-  Renderer,
-  composeWorldSpaceSurfaces,
-} from "@plasius/renderer";
+- Renderer execution, frame scheduling, WebGPU wavefront transport, and mesh-BVH
+  traversal: [`@plasius/gpu-renderer`](https://github.com/Plasius-LTD/gpu-renderer)
+- Lighting, shadow policy, HDRI, and transport integration:
+  [`@plasius/gpu-lighting`](https://github.com/Plasius-LTD/gpu-lighting)
+- Device budgets and adaptive quality policy:
+  [`@plasius/gpu-performance`](https://github.com/Plasius-LTD/gpu-performance)
+- Camera behavior: [`@plasius/gpu-camera`](https://github.com/Plasius-LTD/gpu-camera)
+- Physics: [`@plasius/gpu-physics`](https://github.com/Plasius-LTD/gpu-physics)
+- XR: [`@plasius/gpu-xr`](https://github.com/Plasius-LTD/gpu-xr)
 
-const { surfaces, collisions } = composeWorldSpaceSurfaces([
-  { id: "focus-pane", slot: "reticle", layer: "screen" },
-  { id: "mission-alert", slot: "reticle", layer: "alert" },
-]);
-```
-
-## Development
-
-```bash
-npm ci
-npm run lint
-npm run typecheck
-npm run build
-npm test
-```
-
-## Governance
-
-- ADRs: [docs/adrs](./docs/adrs)
-- TDRs: [docs/tdrs](./docs/tdrs)
-- Design notes: [docs/design](./docs/design)
-- Contributing: [CONTRIBUTING.md](./CONTRIBUTING.md)
-
-## World-Space UI Helpers
-
-- `composeWorldSpaceSurfaces(...)` resolves deterministic render ordering for
-  world-space `screen`, `overlay`, and `alert` surfaces.
-- `resolveWorldSpaceOcclusionPolicy(...)` provides material-safe defaults for
-  depth-aware panels, overlay-biased prompts, and always-visible alerts.
-- Collision reporting flags slots that should only host one focused screen at a
-  time so host runtimes can arbitrate before rendering.
-
-## Build outputs
-
-- ESM: `dist/`
-- Types: `dist/*.d.ts`
-
-## License
-
-Apache-2.0
-
-<!-- BEGIN PLASIUS RELEASE INTEGRITY -->
-## Release integrity
-
-CI keeps the administrative contributor registry outside Git and npm package
-artifacts using exact, case-normalised path checks. CI runs on approved
-self-hosted runners and enforces at least 80% statement, branch, function, and
-line coverage across the complete TypeScript and TSX test inventory. Release
-preparation and npm publication use GitHub-hosted runners with Node.js 24.18.0
-LTS. CD remains disabled until the npm trusted publisher binding is verified
-and the legacy token fallback is removed.
-<!-- END PLASIUS RELEASE INTEGRITY -->
+See [the retirement record](./docs/RETIREMENT.md) for the consumer audit,
+discarded surfaces, registry evidence, and boundary decisions.
