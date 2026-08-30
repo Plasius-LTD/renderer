@@ -12,6 +12,9 @@ The format is based on **[Keep a Changelog](https://keepachangelog.com/en/1.1.0/
   - (placeholder)
 
 - **Changed**
+  - Replaced package publication automation with a one-purpose, production-
+    environment registry administration workflow for permanent package
+    deprecation ahead of repository retirement.
   - CI now runs the complete TypeScript and TSX test inventory with enforced 80% statement, branch, function, and line coverage thresholds.
   - (placeholder)
 

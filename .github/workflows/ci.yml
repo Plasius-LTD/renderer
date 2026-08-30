@@ -1,38 +1,56 @@
-name: CI
+name: Retirement CI
+
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
+
 permissions:
   contents: read
 
 jobs:
-  build-test:
-    runs-on: [self-hosted, Linux, X64]
+  trusted_head:
+    name: Trusted head admission
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    permissions: {}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: ".nvmrc"
-          cache: "npm"
-      - run: npm ci --no-fund --no-audit
-      - run: npm run build
-      - run: npm run test:coverage
+      - name: Reject external fork execution
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          HEAD_REPOSITORY: ${{ github.event.pull_request.head.repo.full_name }}
+          BASE_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if [ "${EVENT_NAME}" = "pull_request" ] && [ "${HEAD_REPOSITORY}" != "${BASE_REPOSITORY}" ]; then
+            echo "External fork pull requests cannot execute repository retirement administration." >&2
+            exit 1
+          fi
 
-  # BEGIN PLASIUS PUBLIC ARTIFACT INTEGRITY JOB
-  public_artifact_integrity:
-    name: Public artifact integrity
+  validate_retirement:
+    name: Validate retirement administration
+    needs: trusted_head
     if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository }}
-    runs-on: [self-hosted, Linux, X64]
-    timeout-minutes: 10
-    permissions:
-      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v6
         with:
-          node-version-file: .nvmrc
-      - name: Verify public artifact integrity
-        run: node ./scripts/verify-public-artifacts.cjs '--package-dir' '.'
-  # END PLASIUS PUBLIC ARTIFACT INTEGRITY JOB
+          persist-credentials: false
+      - name: Verify the one-purpose production workflow
+        run: |
+          set -euo pipefail
+          FILE=.github/workflows/cd.yml
+          grep -Fq 'environment: production' "${FILE}"
+          grep -Fq 'npm deprecate' "${FILE}"
+          grep -Fq 'secrets.NPM_TOKEN' "${FILE}"
+          grep -Fq 'RETIRE @plasius/renderer' "${FILE}"
+          if grep -Fq 'npm publish' "${FILE}"; then
+            echo "The retirement workflow must not contain a package publish path." >&2
+            exit 1
+          fi
+          if grep -REq '^[[:space:]]*pull_request_target:' .github/workflows; then
+            echo "Retirement workflows must not use pull_request_target." >&2
+            exit 1
+          fi
