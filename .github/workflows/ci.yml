@@ -50,7 +50,7 @@ jobs:
             echo "The retirement workflow must not contain a package publish path." >&2
             exit 1
           fi
-          if grep -Rq 'pull_request_target' .github/workflows; then
+          if grep -REq '^[[:space:]]*pull_request_target:' .github/workflows; then
             echo "Retirement workflows must not use pull_request_target." >&2
             exit 1
           fi
